@@ -392,49 +392,51 @@
         </select>
       </div>
 
-      <div class="legend mag-legend"
-        style="margin-top: 0; border-left: 1px solid #ddd; padding-left: 15px; flex-direction: column; align-items: flex-start; gap: 6px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-weight: 600;">Magnitude</span>
-          <button class="small-btn" onclick="setAllMagRanges(true)">All</button>
-          <button class="small-btn" onclick="setAllMagRanges(false)">Clear</button>
+      <div style="display: flex; gap: 0; border-left: 1px solid #ddd;">
+        <div class="legend mag-legend"
+          style="margin-top: 0; padding-left: 15px; padding-right: 15px; flex-direction: column; align-items: flex-start; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600;">Magnitude</span>
+            <button class="small-btn" onclick="setAllMagRanges(true)">All</button>
+            <button class="small-btn" onclick="setAllMagRanges(false)">Clear</button>
+          </div>
+          <div style="display: grid; grid-template-columns: auto auto; gap: 4px 15px;">
+            <label class="legend-item"><input type="checkbox" checked data-range="low"
+                onchange="toggleMagRange('low', this.checked)"> <span class="dot"
+                style="background: #ffff00"></span>&lt;2.5</label>
+            <label class="legend-item"><input type="checkbox" checked data-range="mid"
+                onchange="toggleMagRange('mid', this.checked)"> <span class="dot"
+                style="background: #fd7e14"></span>2.5-4.5</label>
+            <label class="legend-item"><input type="checkbox" checked data-range="high"
+                onchange="toggleMagRange('high', this.checked)"> <span class="dot"
+                style="background: #dc3545"></span>4.5-6.0</label>
+            <label class="legend-item"><input type="checkbox" checked data-range="extreme"
+                onchange="toggleMagRange('extreme', this.checked)"> <span class="dot"
+                style="background: #6f42c1"></span>&ge;6.0</label>
+          </div>
         </div>
-        <div style="display: flex; gap: 12px;">
-          <label class="legend-item"><input type="checkbox" checked data-range="low"
-              onchange="toggleMagRange('low', this.checked)"> <span class="dot"
-              style="background: #ffff00"></span>&lt;2.5</label>
-          <label class="legend-item"><input type="checkbox" checked data-range="mid"
-              onchange="toggleMagRange('mid', this.checked)"> <span class="dot"
-              style="background: #fd7e14"></span>2.5-4.5</label>
-          <label class="legend-item"><input type="checkbox" checked data-range="high"
-              onchange="toggleMagRange('high', this.checked)"> <span class="dot"
-              style="background: #dc3545"></span>4.5-6.0</label>
-          <label class="legend-item"><input type="checkbox" checked data-range="extreme"
-              onchange="toggleMagRange('extreme', this.checked)"> <span class="dot"
-              style="background: #6f42c1"></span>&ge;6.0</label>
-        </div>
-      </div>
 
-      <div class="legend depth-legend" id="depthLegend"
-        style="margin-top: 0; border-left: 1px solid #ddd; padding-left: 15px; flex-direction: column; align-items: flex-start; gap: 6px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-weight: 600;">Depth</span>
-          <button class="small-btn" onclick="setAllDepthRanges(true)">All</button>
-          <button class="small-btn" onclick="setAllDepthRanges(false)">Clear</button>
-        </div>
-        <div style="display: flex; gap: 12px;">
-          <label class="legend-item"><input type="checkbox" checked data-range="shallow"
-              onchange="toggleDepthRange('shallow', this.checked)"> <span class="dot"
-              style="background: #4caf50;"></span><span id="depth-range-1">0-6mi</span></label>
-          <label class="legend-item"><input type="checkbox" checked data-range="intermediate"
-              onchange="toggleDepthRange('intermediate', this.checked)"> <span class="dot"
-              style="background: #ffeb3b;"></span><span id="depth-range-2">6-19mi</span></label>
-          <label class="legend-item"><input type="checkbox" checked data-range="deep"
-              onchange="toggleDepthRange('deep', this.checked)"> <span class="dot"
-              style="background: #ff9800;"></span><span id="depth-range-3">19-43mi</span></label>
-          <label class="legend-item"><input type="checkbox" checked data-range="verydeep"
-              onchange="toggleDepthRange('verydeep', this.checked)"> <span class="dot"
-              style="background: #f44336;"></span><span id="depth-range-4">&gt;43mi</span></label>
+        <div class="legend depth-legend" id="depthLegend"
+          style="margin-top: 0; border-left: 1px solid #ddd; padding-left: 15px; flex-direction: column; align-items: flex-start; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600;">Depth</span>
+            <button class="small-btn" onclick="setAllDepthRanges(true)">All</button>
+            <button class="small-btn" onclick="setAllDepthRanges(false)">Clear</button>
+          </div>
+          <div style="display: grid; grid-template-columns: auto auto; gap: 4px 15px;">
+            <label class="legend-item"><input type="checkbox" checked data-range="shallow"
+                onchange="toggleDepthRange('shallow', this.checked)"> <span class="dot"
+                style="background: #4caf50;"></span><span id="depth-range-1">Shallow (0-6mi)</span></label>
+            <label class="legend-item"><input type="checkbox" checked data-range="intermediate"
+                onchange="toggleDepthRange('intermediate', this.checked)"> <span class="dot"
+                style="background: #ffeb3b;"></span><span id="depth-range-2">Intermediate (6-19mi)</span></label>
+            <label class="legend-item"><input type="checkbox" checked data-range="deep"
+                onchange="toggleDepthRange('deep', this.checked)"> <span class="dot"
+                style="background: #ff9800;"></span><span id="depth-range-3">Deep (19-43mi)</span></label>
+            <label class="legend-item"><input type="checkbox" checked data-range="verydeep"
+                onchange="toggleDepthRange('verydeep', this.checked)"> <span class="dot"
+                style="background: #f44336;"></span><span id="depth-range-4">Very Deep (>43mi)</span></label>
+          </div>
         </div>
       </div>
 
@@ -646,15 +648,15 @@
 
       // Update depth legend
       if (unit === 'mi') {
-        document.getElementById('depth-range-1').textContent = '0-6mi';
-        document.getElementById('depth-range-2').textContent = '6-19mi';
-        document.getElementById('depth-range-3').textContent = '19-43mi';
-        document.getElementById('depth-range-4').textContent = '>43mi';
+        document.getElementById('depth-range-1').textContent = 'Shallow (0-6mi)';
+        document.getElementById('depth-range-2').textContent = 'Intermediate (6-19mi)';
+        document.getElementById('depth-range-3').textContent = 'Deep (19-43mi)';
+        document.getElementById('depth-range-4').textContent = 'Very Deep (>43mi)';
       } else {
-        document.getElementById('depth-range-1').textContent = '0-10km';
-        document.getElementById('depth-range-2').textContent = '10-30km';
-        document.getElementById('depth-range-3').textContent = '30-70km';
-        document.getElementById('depth-range-4').textContent = '>70km';
+        document.getElementById('depth-range-1').textContent = 'Shallow (0-10km)';
+        document.getElementById('depth-range-2').textContent = 'Intermediate (10-30km)';
+        document.getElementById('depth-range-3').textContent = 'Deep (30-70km)';
+        document.getElementById('depth-range-4').textContent = 'Very Deep (>70km)';
       }
     }
 
@@ -748,8 +750,9 @@
      */
     function getDepthCategory(depth) {
       if (depth < 10) return "Shallow";
-      if (depth <= 70) return "Intermediate";
-      return "Deep";
+      if (depth < 30) return "Intermediate";
+      if (depth < 70) return "Deep";
+      return "Very Deep";
     }
 
     /**
@@ -882,29 +885,29 @@
 
         // Add to list
         visibleQuakes.push({
-          // USGS SOURCED FIELDS
-          mag: qMag,
-          magType: f.properties.magType,
-          place,
-          time,
-          updated: f.properties.updated,
-          status: f.properties.status,
-          type: f.properties.type,
-          felt: f.properties.felt,
-          cdi: f.properties.cdi,
-          sig: f.properties.sig,
-          nst: f.properties.nst,
-          gap: f.properties.gap,
-          rms: f.properties.rms,
-          url: f.properties.url,
-          lat,
-          lon,
-          depthKm,
+          // --- USGS SOURCED FIELDS (Direct from GeoJSON) ---
+          mag: qMag,                      // properties.mag: Decimal magnitude of the event
+          magType: f.properties.magType,  // properties.magType: Method or algorithm used to calculate magnitude
+          place,                          // properties.place: Textual description of named geographic region
+          time,                           // properties.time: Time when the event occurred (ms since epoch)
+          updated: f.properties.updated,  // properties.updated: Time when the event was last updated
+          status: f.properties.status,    // properties.status: Indicates whether the event has been reviewed by a human
+          type: f.properties.type,        // properties.type: Type of seismic event (e.g., 'earthquake', 'quarry blast')
+          felt: f.properties.felt,        // properties.felt: Total number of felt reports submitted to the DYFI system
+          cdi: f.properties.cdi,          // properties.cdi: Maximum reported intensity for the event
+          sig: f.properties.sig,          // properties.sig: A number describing how significant the event is
+          nst: f.properties.nst,          // properties.nst: Number of seismic stations used to determine location
+          gap: f.properties.gap,          // properties.gap: Largest azimuthal gap between stations (degrees)
+          rms: f.properties.rms,          // properties.rms: Root-mean-square residual of the travel time (seconds)
+          url: f.properties.url,          // properties.url: URL to the USGS event page for more details
+          lat,                            // geometry.coordinates[1]: Latitude
+          lon,                            // geometry.coordinates[0]: Longitude
+          depthKm,                        // geometry.coordinates[2]: Depth in kilometers
 
-          // DERIVED FIELDS
-          distance,
-          depthCategory: getDepthCategory(depthKm),
-          confidence: calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms),
+          // --- DERIVED FIELDS (Computed in code) ---
+          distance,                       // Derived: Distance from user search center (Haversine formula)
+          depthCategory: getDepthCategory(depthKm), // Derived: Classification (Shallow/Intermediate/Deep)
+          confidence: calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms), // Derived: Data quality assessment
 
           // UI Helpers
           marker,
@@ -938,12 +941,13 @@
                     ${listPinSvg} ${q.mag ?? "?"} <span style="font-size: 12px; color: #718096; margin-left: 4px; font-weight: 600;">${q.magType ?? ""}</span>
                   </span>
                   <div style="display: flex; gap: 8px; align-items: center;">
-                    <span class="depth-badge" style="background:${q.depthColor}; color:#fff;">${q.depthCategory}: ${formatDepth(q.depthKm)}</span>
+                    <span class="depth-badge" style="background:${q.depthColor}; color:#fff;">${q.depthCategory}</span>
+                    <span style="font-size: 14px; font-weight: 800; color: ${q.depthColor};">${formatDepth(q.depthKm)}</span>
                   </div>
                 </div>
                 <div class="quake-time">
-                  <span>${timeStr}</span>
-                  <span style="color: #4299e1; font-size: 11px;">${relativeTime.toUpperCase()}</span>
+                  <span style="font-size: 11px; color: #718096;">${q.time ? q.time.toLocaleDateString() : ""} ${timeStr}</span>
+                  <span style="color: #4299e1; font-size: 11px; font-weight: 700;">${relativeTime.toUpperCase()}</span>
                 </div>
             </div>
             <div class="quake-place">${q.place}</div>
@@ -953,9 +957,8 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
                   </div>
                   <div>
-                    <div class="detail-label">Epicenter</div>
-                    <div id="${addressId}" class="detail-value" style="font-style: italic; color: #718096;">Fetching address...</div>
-                    <div class="detail-value" style="font-size: 11px; color: #a0aec0; margin-top: 2px;">${q.lat.toFixed(4)}, ${q.lon.toFixed(4)}</div>
+                    <div class="detail-label">Epicenter: <span style="font-weight: normal; color: #a0aec0; margin-left: 4px;">${q.lat.toFixed(4)}, ${q.lon.toFixed(4)}</span></div>
+                    <div id="${addressId}" class="detail-value" style="font-style: italic; color: #718096; font-size: 13px; margin-top: 2px;">Fetching address...</div>
                   </div>
                 </div>
                 <div class="detail-row">
@@ -963,8 +966,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
                   <div>
-                    <div class="detail-label">Distance</div>
-                    <div class="detail-value">${formatDistance(q.distance)} away from search center</div>
+                    <div class="detail-label">Distance: <span style="font-weight: normal; color: #a0aec0; margin-left: 4px;">${formatDistance(q.distance)}</span></div>
                   </div>
                 </div>
             </div>
