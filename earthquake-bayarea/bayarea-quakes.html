@@ -342,6 +342,30 @@
       opacity: 0.7;
       margin-top: 6px;
     }
+
+    .derived-tag {
+      font-size: 10px;
+      background: #ebf8ff;
+      color: #3182ce;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-left: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
+    .confidence-high {
+      color: #38a169;
+    }
+
+    .confidence-med {
+      color: #d69e2e;
+    }
+
+    .confidence-low {
+      color: #e53e3e;
+    }
   </style>
 </head>
 
@@ -742,6 +766,32 @@
       return `${diffDays}d ago`;
     }
 
+    /**
+     * Derived: Depth Category
+     * Shallow < 10km, Intermediate 10-70km, Deep > 70km
+     */
+    function getDepthCategory(depth) {
+      if (depth < 10) return "Shallow";
+      if (depth <= 70) return "Intermediate";
+      return "Deep";
+    }
+
+    /**
+     * Derived: Confidence Label
+     * Based on status, nst (stations), gap (azimuthal gap), and rms (residual)
+     */
+    function calculateConfidence(status, nst, gap, rms) {
+      let score = 0;
+      if (status === 'reviewed') score += 1;
+      if (nst && nst > 20) score += 1;
+      if (gap && gap < 120) score += 1;
+      if (rms && rms < 0.5) score += 1;
+
+      if (score >= 3) return { label: "High", level: "high" };
+      if (score >= 1) return { label: "Moderate", level: "med" };
+      return { label: "Low", level: "low" };
+    }
+
     // Reverse geocode lat/lon to address
     async function getReverseGeocode(lat, lon, elementId) {
       const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
@@ -831,14 +881,26 @@
         // Add to map
         const marker = addMarker(lat, lon, null, false, getColorForMagnitude(qMag), depthKm);
 
+        const confidence = calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms);
+        const depthCategory = getDepthCategory(depthKm);
+
         const popupHtml = `
-          <div style="font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
-            <div><b>M ${qMag ?? "?"}</b> — ${place}</div>
-            <div>${time ? time.toLocaleString() : "Time unknown"}</div>
-            <div>Depth: ${formatDepth(depthKm)}</div>
-            <div>Dist: ${formatDistance(distance)}</div>
-            <div><a href="https://www.openstreetmap.org/?mlat=${lat.toFixed(4)}&mlon=${lon.toFixed(4)}&zoom=12" target="_blank" rel="noopener">${lat.toFixed(4)}, ${lon.toFixed(4)}</a></div>
-            ${url ? `<div style="margin-top:6px"><a href="${url}" target="_blank" rel="noopener">USGS event page</a></div>` : ""}
+          <div style="font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; min-width: 200px;">
+            <div style="font-size: 16px; margin-bottom: 8px;"><b>${qMag ?? "?"} ${f.properties.magType ?? ""}</b> — ${place}</div>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-bottom: 8px;">
+              <span style="color: #666;">Time:</span> <span>${time ? time.toLocaleString() : "Time unknown"}</span>
+              <span style="color: #666;">Depth:</span> <span>${formatDepth(depthKm)} (${depthCategory}) <small class="derived-tag">DERIVED</small></span>
+              <span style="color: #666;">Dist:</span> <span>${formatDistance(distance)} <small class="derived-tag">DERIVED</small></span>
+              <span style="color: #666;">Felt:</span> <span>${f.properties.felt ?? 0} reports / ${f.properties.cdi ?? 'N/A'} intensity</span>
+              <span style="color: #666;">Confidence:</span> <span class="confidence-${confidence.level}">${confidence.label} <small class="derived-tag">DERIVED</small></span>
+            </div>
+            <div style="font-size: 11px; color: #999; margin-bottom: 8px;">
+              USGS ID: ${f.id} | Status: ${f.properties.status.toUpperCase()}
+            </div>
+            <div style="border-top: 1px solid #eee; padding-top: 8px; display: flex; justify-content: space-between;">
+              <a href="https://www.openstreetmap.org/?mlat=${lat.toFixed(4)}&mlon=${lon.toFixed(4)}&zoom=12" target="_blank" rel="noopener">Map Link</a>
+              ${url ? `<a href="${url}" target="_blank" rel="noopener" style="font-weight: 700; color: #007bff;">USGS Event Page</a>` : ""}
+            </div>
           </div>
         `;
         marker.bindPopup(popupHtml);
@@ -846,15 +908,33 @@
 
         // Add to list
         visibleQuakes.push({
+          // USGS SOURCED FIELDS
           mag: qMag,
+          magType: f.properties.magType,
           place,
           time,
-          depthKm,
-          distance,
-          marker,
-          depthColor: getColorForDepth(depthKm),
+          updated: f.properties.updated,
+          status: f.properties.status,
+          type: f.properties.type,
+          felt: f.properties.felt,
+          cdi: f.properties.cdi,
+          sig: f.properties.sig,
+          nst: f.properties.nst,
+          gap: f.properties.gap,
+          rms: f.properties.rms,
+          url: f.properties.url,
           lat,
-          lon
+          lon,
+          depthKm,
+
+          // DERIVED FIELDS
+          distance,
+          depthCategory: getDepthCategory(depthKm),
+          confidence: calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms),
+
+          // UI Helpers
+          marker,
+          depthColor: getColorForDepth(depthKm)
         });
       }
 
@@ -881,9 +961,12 @@
             <div class="quake-header">
                 <div class="quake-mag-group">
                   <span class="quake-mag">
-                    ${listPinSvg} ${q.mag ?? "?"}
+                    ${listPinSvg} ${q.mag ?? "?"} <span style="font-size: 12px; color: #718096; margin-left: 4px; font-weight: 600;">${q.magType ?? ""}</span>
                   </span>
-                  <span class="depth-badge" style="background:${q.depthColor}; color:#fff;">Depth: ${formatDepth(q.depthKm)}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="depth-badge" style="background:${q.depthColor}; color:#fff;">Depth: ${formatDepth(q.depthKm)}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #718096; text-transform: uppercase;">${q.depthCategory} <small class="derived-tag">DERIVED</small></span>
+                  </div>
                 </div>
                 <div class="quake-time">
                   <span>${timeStr}</span>
@@ -907,8 +990,18 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
                   <div>
-                    <div class="detail-label">Distance</div>
+                    <div class="detail-label">Distance <small class="derived-tag">DERIVED</small></div>
                     <div class="detail-value">${formatDistance(q.distance)} away from search center</div>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;">
+                  <div>
+                    <div class="detail-label">Confidence <small class="derived-tag">DERIVED</small></div>
+                    <div class="detail-value confidence-${q.confidence.level}" style="font-size: 13px;">${q.confidence.label}</div>
+                  </div>
+                  <div>
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value" style="font-size: 13px;">${q.status.toUpperCase()}</div>
                   </div>
                 </div>
             </div>
