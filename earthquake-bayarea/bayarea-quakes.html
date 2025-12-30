@@ -4,11 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bay Area Earthquake Tracker (USGS + Leaflet)</title>
+  <title>Bay Area Earthquake Tracker (USGS + OpenStreetMap)</title>
 
-  <!-- Leaflet CSS/JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- OpenLayers CSS/JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
+  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
 
   <style>
     html,
@@ -56,19 +56,27 @@
     }
 
     .quake-item {
-      background: white;
-      border: 1px solid #edf2f7;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -1px rgba(0, 0, 0, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 4px;
       position: relative;
       overflow: hidden;
+      border-bottom: 3px solid #cbd5e0;
+    }
+
+    .quake-item:nth-child(even) {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
     .quake-item::before {
@@ -77,20 +85,26 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 4px;
-      background: transparent;
-      transition: background 0.3s ease;
+      width: 5px;
+      background: #e2e8f0;
+      transition: all 0.3s ease;
     }
 
     .quake-item:hover {
-      background: #fff;
-      border-color: #e2e8f0;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-      transform: translateY(-2px);
+      background: white;
+      border-color: #4299e1;
+      border-bottom-color: #3182ce;
+      box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transform: translateY(-6px) scale(1.02);
+      z-index: 10;
     }
 
     .quake-item:hover::before {
       background: #4299e1;
+      width: 8px;
     }
 
     .quake-header {
@@ -110,7 +124,7 @@
     .quake-mag {
       font-weight: 900;
       color: #1a202c;
-      font-size: 1.6em;
+      font-size: 2em;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -132,8 +146,8 @@
       font-size: 18px;
       font-weight: 800;
       color: #2d3748;
-      line-height: 1.3;
-      margin-top: 4px;
+      line-height: 1.2;
+      margin-top: 2px;
     }
 
     .quake-details {
@@ -141,9 +155,9 @@
       color: #4a5568;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       border-top: 1px solid #edf2f7;
-      padding-top: 14px;
+      padding-top: 10px;
     }
 
     .detail-row {
@@ -170,7 +184,7 @@
     .detail-value {
       color: #2d3748;
       line-height: 1.5;
-      font-size: 15px;
+      font-size: 16px;
     }
 
     .depth-badge {
@@ -295,6 +309,91 @@
       font-size: 16px;
     }
 
+    /* Dashboard Analytics Section */
+    #dashboard-analytics {
+      background: #f8fafc;
+      padding: 6px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .analytics-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-right: 15px;
+      border-right: 1px solid #e2e8f0;
+    }
+
+    .analytics-group:last-child {
+      border-right: none;
+    }
+
+    .group-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0;
+    }
+
+    .group-content {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .analytics-card {
+      background: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 60px;
+      transition: all 0.2s ease;
+    }
+
+    .analytics-card:hover {
+      border-color: #cbd5e1;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .analytics-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .analytics-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .analytics-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1;
+    }
+
+    .analytics-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-left: 2px;
+    }
+
     button.search-btn {
       padding: 6px 20px;
       background: #007bff;
@@ -359,12 +458,12 @@
     <div class="control-row" style="align-items: flex-start; gap: 20px;">
       <div class="control-group">
         <label for="locationInput">Center Location</label>
-        <input type="text" id="locationInput" placeholder="e.g. San Francisco" value="San Francisco"
+        <input type="text" id="locationInput" placeholder="e.g. San Francisco" value="San Ramon"
           style="width: 350px;" />
       </div>
       <div class="control-group">
         <label for="radiusInput" id="radiusLabel">Radius (miles)</label>
-        <input type="number" id="radiusInput" value="50" style="width: 60px;" />
+        <input type="number" id="radiusInput" value="15" style="width: 60px;" />
       </div>
       <div class="control-group">
         <label for="periodInput">Time Period</label>
@@ -429,7 +528,7 @@
                 style="background: #4caf50;"></span><span id="depth-range-1">Shallow (0-6mi)</span></label>
             <label class="legend-item"><input type="checkbox" checked data-range="intermediate"
                 onchange="toggleDepthRange('intermediate', this.checked)"> <span class="dot"
-                style="background: #ffeb3b;"></span><span id="depth-range-2">Intermediate (6-19mi)</span></label>
+                style="background: #2196F3;"></span><span id="depth-range-2">Intermediate (6-19mi)</span></label>
             <label class="legend-item"><input type="checkbox" checked data-range="deep"
                 onchange="toggleDepthRange('deep', this.checked)"> <span class="dot"
                 style="background: #ff9800;"></span><span id="depth-range-3">Deep (19-43mi)</span></label>
@@ -446,13 +545,88 @@
     </div>
   </div>
 
+  <div id="dashboard-analytics">
+    <div class="analytics-group">
+      <div class="group-label">Summary</div>
+      <div class="group-content">
+        <div class="analytics-card" style="border-left: 3px solid #007bff;">
+          <div class="analytics-value" id="stat-total" style="color: #007bff;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Total</div>
+            <div class="analytics-sub" id="stat-radius">Radius: 0 mi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-group">
+      <div class="group-label">Magnitude</div>
+      <div class="group-content">
+        <div class="analytics-card" style="border-left: 3px solid #ffff00;">
+          <div class="analytics-value" id="stat-low" style="color: #e6e600;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Low</div>
+            <div class="analytics-sub">&lt;2.5</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #fd7e14;">
+          <div class="analytics-value" id="stat-mid" style="color: #fd7e14;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Mid</div>
+            <div class="analytics-sub">2.5-4.5</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #dc3545;">
+          <div class="analytics-value" id="stat-high" style="color: #dc3545;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">High</div>
+            <div class="analytics-sub">4.5-6.0</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #6f42c1;">
+          <div class="analytics-value" id="stat-extreme" style="color: #6f42c1;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Extreme</div>
+            <div class="analytics-sub">&ge;6.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-group">
+      <div class="group-label">Depth</div>
+      <div class="group-content">
+        <div class="analytics-card" style="border-left: 3px solid #4caf50;">
+          <div class="analytics-value" id="stat-shallow" style="color: #4caf50;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Shallow</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #2196F3;">
+          <div class="analytics-value" id="stat-intermediate" style="color: #2196F3;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Intermed</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #ff9800;">
+          <div class="analytics-value" id="stat-deep" style="color: #ff9800;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">Deep</div>
+          </div>
+        </div>
+        <div class="analytics-card" style="border-left: 3px solid #f44336;">
+          <div class="analytics-value" id="stat-verydeep" style="color: #f44336;">0</div>
+          <div class="analytics-info">
+            <div class="analytics-label">V. Deep</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="container">
     <div id="map"></div>
     <div id="sidebar">
-      <div id="sidebar-header" style="background: #f1f3f5;">
-        <div id="result-count" style="font-weight: 700; color: #495057; font-size: 14px;">Total : 0 within Radius : 0mi
-        </div>
-      </div>
       <div id="sidebar-content">
         <!-- List items will go here -->
       </div>
@@ -460,90 +634,189 @@
   </div>
 
   <script>
-    // Initialize map
-    const map = L.map("map").setView([37.7589, -121.9576], 10);
-
-    // OpenStreetMap tiles
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    let centerMarker = null;
-    let quakeLayer = L.layerGroup().addTo(map);
-    let currentCenter = { lat: 37.7749, lon: -122.4194 }; // Default San Francisco
-    let currentRadiusMiles = 50;
-    const addressCache = new Map();
-
-    // Custom blue pin icon
-    const bluePinIcon = L.icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
+    // Initialize OpenLayers map
+    const map = new ol.Map({
+      target: 'map',
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        })
+      ],
+      view: new ol.View({
+        center: ol.proj.fromLonLat([-121.9576, 37.7589]),
+        zoom: 10
+      })
     });
 
-    async function updateMap() {
-      const location = document.getElementById('locationInput').value.trim();
-      const radius = parseFloat(document.getElementById('radiusInput').value);
+    // Vector source and layer for markers
+    const vectorSource = new ol.source.Vector();
+    const vectorLayer = new ol.layer.Vector({
+      source: vectorSource
+    });
+    map.addLayer(vectorLayer);
 
-      if (!location) {
-        alert("Please enter a location");
-        return;
+    // Vector source and layer for the search circle
+    const circleSource = new ol.source.Vector();
+    const circleLayer = new ol.layer.Vector({
+      source: circleSource,
+      style: new ol.style.Style({
+        fill: new ol.style.Fill({ color: 'rgba(51, 136, 255, 0.1)' }),
+        stroke: new ol.style.Stroke({ color: '#3388ff', width: 2 })
+      })
+    });
+    map.addLayer(circleLayer);
+
+    // Popup overlay
+    const container = document.createElement('div');
+    container.className = 'ol-popup';
+    const content = document.createElement('div');
+    container.appendChild(content);
+    const closer = document.createElement('a');
+    closer.className = 'ol-popup-closer';
+    container.appendChild(closer);
+
+    const overlay = new ol.Overlay({
+      element: container,
+      autoPan: true,
+      autoPanAnimation: { duration: 250 }
+    });
+    map.addOverlay(overlay);
+
+    closer.onclick = function () {
+      overlay.setPosition(undefined);
+      closer.blur();
+      return false;
+    };
+
+    // Add styles for OpenLayers popup
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .ol-popup {
+        position: absolute;
+        background-color: white;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 280px;
       }
-      if (isNaN(radius) || radius <= 0) {
-        alert("Please enter a valid radius");
-        return;
+      .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+      }
+      .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+      }
+      .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+        cursor: pointer;
+      }
+      .ol-popup-closer:after {
+        content: "✖";
+        color: #666;
+      }
+    `;
+    document.head.appendChild(style);
+
+    let currentCenter = { lat: 37.7799, lon: -121.9780 }; // Default San Ramon
+    let currentRadiusMiles = 15;
+    const addressCache = new Map();
+
+    function addMarker(lat, lon, popupHtml, isCenter = false, color = '#ff0000', depthKm = null, mag = 2.0) {
+      const feature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([lon, lat])),
+        popupHtml: popupHtml,
+        lat: lat,
+        lon: lon,
+        isCenter: isCenter
+      });
+
+      let style;
+      if (isCenter) {
+        // Custom blue pin for center
+        const centerSvg = `
+          <svg width="30" height="42" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 0C6.71573 0 0 6.71573 0 15C0 26.25 15 42 15 42C15 42 30 26.25 30 15C30 6.71573 23.2843 0 15 0Z" fill="#007bff"/>
+            <circle cx="15" cy="15" r="6" fill="white"/>
+          </svg>
+        `;
+        style = new ol.style.Style({
+          image: new ol.style.Icon({
+            anchor: [0.5, 1],
+            src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(centerSvg),
+            scale: 1
+          })
+        });
+      } else {
+        const depthColor = depthKm !== null ? getColorForDepth(depthKm) : '#000';
+        const fullPinSvg = getPinSvg(lat, lon, color, depthKm !== null ? '-d' + Math.round(depthKm) : '', mag, depthColor);
+
+        // Calculate anchor based on needle length
+        const m = Math.max(1, mag || 1);
+        const needleLength = 10 + (m * 4);
+        const centerX = 30;
+        const centerY = 30;
+        const svgWidth = 60;
+        const svgHeight = centerY + needleLength + 10;
+
+        // Anchor point is the tip of the needle: [centerX, centerY + needleLength]
+        const anchorX = centerX / svgWidth;
+        const anchorY = (centerY + needleLength) / svgHeight;
+
+        style = new ol.style.Style({
+          image: new ol.style.Icon({
+            anchor: [anchorX, anchorY],
+            src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fullPinSvg),
+            scale: 1
+          })
+        });
       }
 
-      // Convert radius to miles if user entered km
-      const unit = document.getElementById('depthUnitInput').value;
-      currentRadiusMiles = unit === 'km' ? kmToMiles(radius) : radius;
-
-      try {
-        // Geocode location
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&countrycodes=us&format=json&limit=1`);
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-          const { lat, lon, display_name } = data[0];
-          currentCenter = { lat: parseFloat(lat), lon: parseFloat(lon) };
-
-          // Update center pin
-          if (centerMarker) map.removeLayer(centerMarker);
-          centerMarker = addMarker(currentCenter.lat, currentCenter.lon, `<b>Search center:</b><br>${display_name}`, true);
-          centerMarker.addTo(map).openPopup();
-
-          // Update input field to show the actual address found
-          document.getElementById('locationInput').value = display_name;
-
-          // Fit map to radius and show circle
-          const radiusMeters = currentRadiusMiles * 1609.34;
-
-          // Remove existing circle if any (need to track it)
-          if (window.currentCircle) map.removeLayer(window.currentCircle);
-
-          window.currentCircle = L.circle([currentCenter.lat, currentCenter.lon], {
-            color: '#3388ff',
-            fillColor: '#3388ff',
-            fillOpacity: 0.1,
-            radius: radiusMeters
-          }).addTo(map);
-
-          map.fitBounds(window.currentCircle.getBounds());
-
-          // Load quakes
-          loadQuakes();
-        } else {
-          alert("Location not found");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Error searching location");
-      }
+      feature.setStyle(style);
+      vectorSource.addFeature(feature);
+      return feature;
     }
+
+    // Handle map clicks for popups
+    map.on('singleclick', function (evt) {
+      const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+        return feature;
+      });
+
+      if (feature && feature.get('popupHtml')) {
+        const coordinates = feature.getGeometry().getCoordinates();
+        content.innerHTML = feature.get('popupHtml');
+        overlay.setPosition(coordinates);
+
+        // Trigger address fetch if needed
+        const lat = feature.get('lat');
+        const lon = feature.get('lon');
+        if (lat && lon) {
+          getReverseGeocode(lat, lon);
+        }
+      } else {
+        overlay.setPosition(undefined);
+      }
+    });
 
     function getDistanceFromLatLonInMiles(lat1, lon1, lat2, lon2) {
       var R = 3958.8; // Radius of the earth in miles
@@ -561,12 +834,6 @@
 
     function deg2rad(deg) {
       return deg * (Math.PI / 180)
-    }
-
-    // Simple magnitude -> marker radius (pixels)
-    function radiusFromMag(mag) {
-      if (!mag) return 4;
-      return Math.max(4, mag * 3);
     }
 
     const activeMagRanges = {
@@ -618,41 +885,31 @@
       return '#6f42c1'; // Purple (Significant)
     }
 
-    // Convert km to miles
     function kmToMiles(km) {
       return km * 0.621371;
     }
 
-    // Format depth based on selected unit
     function formatDepth(depthKm) {
       const unit = document.getElementById('depthUnitInput').value;
       if (!Number.isFinite(depthKm)) return '?';
 
       if (unit === 'mi') {
         const depthMi = kmToMiles(depthKm);
-        return depthMi.toFixed(1) + ' mi';
+        return depthMi.toFixed(1) + ' mi deep';
       }
-      return depthKm.toFixed(1) + ' km';
+      return depthKm.toFixed(1) + ' km deep';
     }
 
-    // Update depth legend based on selected unit
     function updateDepthLegend() {
       const unit = document.getElementById('depthUnitInput').value;
-
-      // Update radius label
       if (unit === 'mi') {
         document.getElementById('radiusLabel').textContent = 'Radius (miles)';
-      } else {
-        document.getElementById('radiusLabel').textContent = 'Radius (km)';
-      }
-
-      // Update depth legend
-      if (unit === 'mi') {
         document.getElementById('depth-range-1').textContent = 'Shallow (0-6mi)';
         document.getElementById('depth-range-2').textContent = 'Intermediate (6-19mi)';
         document.getElementById('depth-range-3').textContent = 'Deep (19-43mi)';
         document.getElementById('depth-range-4').textContent = 'Very Deep (>43mi)';
       } else {
+        document.getElementById('radiusLabel').textContent = 'Radius (km)';
         document.getElementById('depth-range-1').textContent = 'Shallow (0-10km)';
         document.getElementById('depth-range-2').textContent = 'Intermediate (10-30km)';
         document.getElementById('depth-range-3').textContent = 'Deep (30-70km)';
@@ -660,7 +917,6 @@
       }
     }
 
-    // Format distance (for radius display in results)
     function formatDistance(distanceMiles) {
       const unit = document.getElementById('depthUnitInput').value;
       if (unit === 'km') {
@@ -670,65 +926,46 @@
       return distanceMiles.toFixed(1) + ' mi';
     }
 
-    // Depth color mapping (shallow = green, deep = red)
     function getColorForDepth(depthKm) {
       if (!Number.isFinite(depthKm)) return '#999';
-      // 0-10km green, 10-30km yellow, 30-70km orange, >70km red
       if (depthKm < 10) return '#4caf50'; // green
-      if (depthKm < 30) return '#ffeb3b'; // yellow
+      if (depthKm < 30) return '#2196F3'; // blue
       if (depthKm < 70) return '#ff9800'; // orange
       return '#f44336'; // red
     }
 
-    function getPinSvg(lat, lon, color, idSuffix = '') {
+    let pinIdCounter = 0;
+    function getPinSvg(lat, lon, color, idSuffix = '', mag = 2.0, depthColor = null, scale = 1.0) {
+      const m = Math.max(1, mag || 1) * scale;
+      const headRadius = 6 + (m * 1.5);
+      const needleLength = 10 + (m * 4);
+      const uniqueId = `grad-${pinIdCounter++}-${Math.random().toString(36).substr(2, 5)}`;
+
+      const centerX = headRadius + 4;
+      const centerY = headRadius + 4;
+
+      const svgWidth = centerX * 2;
+      const svgHeight = centerY + needleLength + 4;
+
+      let depthCircle = '';
+      if (depthColor) {
+        depthCircle = `<circle cx="${centerX}" cy="${centerY}" r="${2 * scale}" fill="${depthColor}" stroke="white" stroke-width="${0.5 * scale}"/>`;
+      }
+
       return `
-          <svg width="24" height="34" viewBox="0 0 24 34" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); vertical-align: middle; margin-right: 5px;">
-             <defs>
-              <radialGradient id="grad-${lat}-${lon}${idSuffix}" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-                <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
-                <stop offset="60%" style="stop-color:${color};stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#dc3545;stop-opacity:1" />
-              </radialGradient>
-            </defs>
-            <!-- Needle -->
-            <path d="M12 12 L12 32" stroke="#dc3545" stroke-width="4" stroke-linecap="round" />
-            <!-- Head -->
-            <circle cx="12" cy="12" r="10" fill="url(#grad-${lat}-${lon}${idSuffix})" />
-          </svg>
-        `;
-    }
-
-    function addMarker(lat, lon, popupText, isCenter = false, color = '#ff0000', depthKm = null) {
-      const el = document.createElement('div');
-      el.className = 'marker';
-
-      if (isCenter) {
-        // Blue pin for center
-        el.innerHTML = `
-          <svg width="30" height="42" viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-            <path d="M15 0C6.71573 0 0 6.71573 0 15C0 26.25 15 42 15 42C15 42 30 26.25 30 15C30 6.71573 23.2843 0 15 0Z" fill="#007bff"/>
-            <circle cx="15" cy="15" r="6" fill="white"/>
-          </svg>
-        `;
-      } else {
-        // Pin with depth indicator
-        const depthColor = depthKm !== null ? getColorForDepth(depthKm) : '#000';
-        const pinSvg = getPinSvg(lat, lon, color, depthKm !== null ? '-d' + Math.round(depthKm) : '');
-        // Add a small circle in the center to show depth
-        el.innerHTML = pinSvg.replace('</svg>', `<circle cx="12" cy="12" r="3" fill="${depthColor}" stroke="white" stroke-width="0.5"/></svg>`);
-      }
-      const customIcon = L.divIcon({
-        className: 'custom-div-icon',
-        html: el.innerHTML,
-        iconAnchor: isCenter ? [15, 42] : [12, 32], // Adjust anchor based on icon size
-        popupAnchor: isCenter ? [0, -40] : [0, -28]
-      });
-
-      const marker = L.marker([lat, lon], { icon: customIcon });
-      if (popupText) {
-        marker.bindPopup(popupText);
-      }
-      return marker;
+        <svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); vertical-align: middle; margin-right: 1px;">
+           <defs>
+            <radialGradient id="${uniqueId}" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
+              <stop offset="60%" style="stop-color:${color};stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#dc3545;stop-opacity:1" />
+            </radialGradient>
+           </defs>
+           <path d="M${centerX - 2.5 * scale} ${centerY} L${centerX + 2.5 * scale} ${centerY} L${centerX} ${centerY + needleLength} Z" fill="#dc3545" />
+           <circle cx="${centerX}" cy="${centerY}" r="${headRadius}" fill="url(#${uniqueId})" />
+           ${depthCircle}
+        </svg>
+      `;
     }
 
     function getRelativeTime(date) {
@@ -744,10 +981,6 @@
       return `${diffDays}d ago`;
     }
 
-    /**
-     * Derived: Depth Category
-     * Shallow < 10km, Intermediate 10-70km, Deep > 70km
-     */
     function getDepthCategory(depth) {
       if (depth < 10) return "Shallow";
       if (depth < 30) return "Intermediate";
@@ -755,51 +988,95 @@
       return "Very Deep";
     }
 
-    /**
-     * Derived: Confidence Label
-     * Based on status, nst (stations), gap (azimuthal gap), and rms (residual)
-     */
-    function calculateConfidence(status, nst, gap, rms) {
-      let score = 0;
-      if (status === 'reviewed') score += 1;
-      if (nst && nst > 20) score += 1;
-      if (gap && gap < 120) score += 1;
-      if (rms && rms < 0.5) score += 1;
-
-      if (score >= 3) return { label: "High", level: "high" };
-      if (score >= 1) return { label: "Moderate", level: "med" };
-      return { label: "Low", level: "low" };
-    }
-
-    // Reverse geocode lat/lon to address
-    async function getReverseGeocode(lat, lon, elementId) {
+    async function getReverseGeocode(lat, lon) {
       const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+      const className = `addr-${lat.toFixed(4)}-${lon.toFixed(4)}`.replace(/[.-]/g, '_');
+
       if (addressCache.has(cacheKey)) {
-        const el = document.getElementById(elementId);
-        if (el) el.textContent = addressCache.get(cacheKey);
+        const address = addressCache.get(cacheKey);
+        document.querySelectorAll(`.${className}`).forEach(el => el.textContent = address);
         return;
       }
 
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=18`);
+        const response = await fetch(`https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}`);
         const data = await response.json();
-        const address = data.display_name || "Address not found";
+        let address = "Address not found";
+        if (data.features && data.features.length > 0) {
+          const p = data.features[0].properties;
+          address = [p.name, p.street, p.city, p.state].filter(Boolean).join(", ");
+        }
         addressCache.set(cacheKey, address);
-        const el = document.getElementById(elementId);
-        if (el) el.textContent = address;
+        document.querySelectorAll(`.${className}`).forEach(el => el.textContent = address);
       } catch (err) {
         console.error("Geocoding error:", err);
-        const el = document.getElementById(elementId);
-        if (el) el.textContent = "Error fetching address";
+        document.querySelectorAll(`.${className}`).forEach(el => {
+          el.innerHTML = `<span style="color: #718096; font-style: italic;">Address unavailable</span>`;
+        });
+      }
+    }
+
+    async function updateMap() {
+      const location = document.getElementById('locationInput').value.trim();
+      const radius = parseFloat(document.getElementById('radiusInput').value);
+
+      if (!location) {
+        alert("Please enter a location");
+        return;
+      }
+      if (isNaN(radius) || radius <= 0) {
+        alert("Please enter a valid radius");
+        return;
+      }
+
+      // Convert radius to miles if user entered km
+      const unit = document.getElementById('depthUnitInput').value;
+      currentRadiusMiles = unit === 'km' ? kmToMiles(radius) : radius;
+
+      try {
+        // Use Photon (OSM-based) for geocoding - faster and more reliable
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(location)}&limit=1`);
+        const data = await response.json();
+
+        if (data && data.features && data.features.length > 0) {
+          const feature = data.features[0];
+          const [lon, lat] = feature.geometry.coordinates;
+          const properties = feature.properties;
+          const displayName = [properties.name, properties.city, properties.state, properties.country].filter(Boolean).join(", ");
+
+          currentCenter = { lat, lon };
+
+          // Update center pin
+          vectorSource.clear();
+          addMarker(currentCenter.lat, currentCenter.lon, `<b>Search center:</b><br>${displayName}`, true);
+
+          // Update input field
+          document.getElementById('locationInput').value = displayName;
+
+          // Fit map to radius and show circle
+          circleSource.clear();
+          const radiusMeters = currentRadiusMiles * 1609.34;
+          // Use geodesic circle (Polygon.circular) to account for Mercator distortion
+          const circleFeature = new ol.Feature(
+            ol.geom.Polygon.circular([lon, lat], radiusMeters, 64).transform('EPSG:4326', 'EPSG:3857')
+          );
+          circleSource.addFeature(circleFeature);
+
+          map.getView().fit(circleSource.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
+          loadQuakes();
+        } else {
+          alert("Location not found. Try a more general name.");
+        }
+      } catch (err) {
+        console.error("Search error:", err);
+        alert("Search service is temporarily unavailable. Please try again in a moment.");
       }
     }
 
     async function loadQuakes() {
       const hours = parseInt(document.getElementById('periodInput').value);
-      // Use "all" magnitude feed; magnitude filtering is now handled by legend checkboxes
       const mag = 'all';
 
-      // Determine feed based on hours
       let period = 'day';
       if (hours <= 1) period = 'hour';
       else if (hours <= 24) period = 'day';
@@ -808,204 +1085,262 @@
 
       const url = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${mag}_${period}.geojson`;
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`USGS feed request failed: ${res.status}`);
-      const geojson = await res.json();
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`USGS feed request failed: ${res.status}`);
+        const geojson = await res.json();
 
-      quakeLayer.clearLayers();
-      const sidebarContent = document.getElementById('sidebar-content');
-      sidebarContent.innerHTML = ''; // Clear list
-
-      let count = 0;
-      const visibleQuakes = [];
-
-      for (const f of (geojson.features || [])) {
-        const coords = f?.geometry?.coordinates;
-        if (!coords || coords.length < 2) continue;
-
-        const lon = coords[0];
-        const lat = coords[1];
-        const depthKm = coords[2];
-
-        // Filter by time (client-side for granular options)
-        const quakeTime = f?.properties?.time;
-        const cutoffTime = Date.now() - (hours * 60 * 60 * 1000);
-        if (quakeTime < cutoffTime) continue;
-
-        // Filter by radius
-        const distance = getDistanceFromLatLonInMiles(currentCenter.lat, currentCenter.lon, lat, lon);
-        if (distance > currentRadiusMiles) continue;
-
-        // Apply legend filters
-        const qMag = f?.properties?.mag;
-        let magRange = 'low';
-        if (qMag >= 6.0) magRange = 'extreme';
-        else if (qMag >= 4.5) magRange = 'high';
-        else if (qMag >= 2.5) magRange = 'mid';
-
-        if (!activeMagRanges[magRange]) continue;
-
-        let depthRange = 'shallow';
-        if (depthKm >= 70) depthRange = 'verydeep';
-        else if (depthKm >= 30) depthRange = 'deep';
-        else if (depthKm >= 10) depthRange = 'intermediate';
-
-        if (!activeDepthRanges[depthRange]) continue;
-
-        count++;
-        const place = f?.properties?.place || "Unknown location";
-        const time = f?.properties?.time ? new Date(f.properties.time) : null;
-        const url = f?.properties?.url;
-
-        // Add to map
-        const marker = addMarker(lat, lon, null, false, getColorForMagnitude(qMag), depthKm);
-
-        const confidence = calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms);
-        const depthCategory = getDepthCategory(depthKm);
-
-        const popupHtml = `
-          <div style="font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; min-width: 200px;">
-            <div style="font-size: 16px; margin-bottom: 8px;"><b>${qMag ?? "?"} ${f.properties.magType ?? ""}</b> — ${place}</div>
-            <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-bottom: 8px;">
-              <span style="color: #666;">Time:</span> <span>${time ? time.toLocaleString() : "Time unknown"}</span>
-              <span style="color: #666;">Depth:</span> <span>${depthCategory} (${formatDepth(depthKm)})</span>
-              <span style="color: #666;">Dist:</span> <span>${formatDistance(distance)}</span>
-              <span style="color: #666;">Felt:</span> <span>${f.properties.felt ?? 0} reports / ${f.properties.cdi ?? 'N/A'} intensity</span>
-            </div>
-            <div style="font-size: 11px; color: #999; margin-bottom: 8px;">
-              USGS ID: ${f.id} | Status: ${f.properties.status.toUpperCase()}
-            </div>
-            <div style="border-top: 1px solid #eee; padding-top: 8px; text-align: center;">
-              ${url ? `<a href="${url}" target="_blank" rel="noopener" style="font-weight: 700; color: #007bff;">View Official USGS Event Page</a>` : ""}
-            </div>
-          </div>
-        `;
-        marker.bindPopup(popupHtml);
-        marker.addTo(quakeLayer);
-
-        // Add to list
-        visibleQuakes.push({
-          // --- USGS SOURCED FIELDS (Direct from GeoJSON) ---
-          mag: qMag,                      // properties.mag: Decimal magnitude of the event
-          magType: f.properties.magType,  // properties.magType: Method or algorithm used to calculate magnitude
-          place,                          // properties.place: Textual description of named geographic region
-          time,                           // properties.time: Time when the event occurred (ms since epoch)
-          updated: f.properties.updated,  // properties.updated: Time when the event was last updated
-          status: f.properties.status,    // properties.status: Indicates whether the event has been reviewed by a human
-          type: f.properties.type,        // properties.type: Type of seismic event (e.g., 'earthquake', 'quarry blast')
-          felt: f.properties.felt,        // properties.felt: Total number of felt reports submitted to the DYFI system
-          cdi: f.properties.cdi,          // properties.cdi: Maximum reported intensity for the event
-          sig: f.properties.sig,          // properties.sig: A number describing how significant the event is
-          nst: f.properties.nst,          // properties.nst: Number of seismic stations used to determine location
-          gap: f.properties.gap,          // properties.gap: Largest azimuthal gap between stations (degrees)
-          rms: f.properties.rms,          // properties.rms: Root-mean-square residual of the travel time (seconds)
-          url: f.properties.url,          // properties.url: URL to the USGS event page for more details
-          lat,                            // geometry.coordinates[1]: Latitude
-          lon,                            // geometry.coordinates[0]: Longitude
-          depthKm,                        // geometry.coordinates[2]: Depth in kilometers
-
-          // --- DERIVED FIELDS (Computed in code) ---
-          distance,                       // Derived: Distance from user search center (Haversine formula)
-          depthCategory: getDepthCategory(depthKm), // Derived: Classification (Shallow/Intermediate/Deep)
-          confidence: calculateConfidence(f.properties.status, f.properties.nst, f.properties.gap, f.properties.rms), // Derived: Data quality assessment
-
-          // UI Helpers
-          marker,
-          depthColor: getColorForDepth(depthKm)
+        // Clear existing quake markers (keep center marker)
+        const features = vectorSource.getFeatures();
+        features.forEach(f => {
+          if (!f.get('isCenter')) vectorSource.removeFeature(f);
         });
-      }
 
-      // Sort by time descending (newest first)
-      visibleQuakes.sort((a, b) => b.time - a.time);
+        const sidebarContent = document.getElementById('sidebar-content');
+        sidebarContent.innerHTML = '';
 
-      // Render list
-      visibleQuakes.forEach(q => {
-        const item = document.createElement('div');
-        item.className = 'quake-item';
-        const cardId = `quake-card-${Math.random().toString(36).substr(2, 9)}`;
-        item.id = cardId;
-        const addressId = `address-${cardId}`;
+        let count = 0;
+        const magCounts = { low: 0, mid: 0, high: 0, extreme: 0 };
+        const depthCounts = { shallow: 0, intermediate: 0, deep: 0, verydeep: 0 };
+        const visibleQuakes = [];
 
-        const magColor = getColorForMagnitude(q.mag);
-        const depthColor = getColorForDepth(q.depthKm);
-        const listPinSvg = getPinSvg(q.marker.getLatLng().lat, q.marker.getLatLng().lng, magColor, '-list-' + Math.random().toString(36).substr(2, 9))
-          .replace('</svg>', `<circle cx="12" cy="12" r="3" fill="${depthColor}" stroke="white" stroke-width="0.5"/></svg>`);
+        for (const f of (geojson.features || [])) {
+          const coords = f?.geometry?.coordinates;
+          if (!coords || coords.length < 2) continue;
 
-        const timeStr = q.time ? q.time.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' }) : "";
-        const relativeTime = getRelativeTime(q.time);
+          const lon = coords[0];
+          const lat = coords[1];
+          const depthKm = coords[2];
 
-        item.innerHTML = `
-            <div class="quake-header">
-                <div class="quake-mag-group">
-                  <span class="quake-mag">
-                    ${listPinSvg} ${q.mag ?? "?"} <span style="font-size: 12px; color: #718096; margin-left: 4px; font-weight: 600;">${q.magType ?? ""}</span>
+          const quakeTime = f?.properties?.time;
+          const cutoffTime = Date.now() - (hours * 60 * 60 * 1000);
+          if (quakeTime < cutoffTime) continue;
+
+          const distance = getDistanceFromLatLonInMiles(currentCenter.lat, currentCenter.lon, lat, lon);
+          if (distance > currentRadiusMiles) continue;
+
+          const qMag = f?.properties?.mag;
+          let magRange = 'low';
+          if (qMag >= 6.0) magRange = 'extreme';
+          else if (qMag >= 4.5) magRange = 'high';
+          else if (qMag >= 2.5) magRange = 'mid';
+
+          if (!activeMagRanges[magRange]) continue;
+
+          let depthRange = 'shallow';
+          if (depthKm >= 70) depthRange = 'verydeep';
+          else if (depthKm >= 30) depthRange = 'deep';
+          else if (depthKm >= 10) depthRange = 'intermediate';
+
+          if (!activeDepthRanges[depthRange]) continue;
+
+          count++;
+          magCounts[magRange]++;
+          depthCounts[depthRange]++;
+          const place = f?.properties?.place || "Unknown location";
+          const time = f?.properties?.time ? new Date(f.properties.time) : null;
+          const timeStr = time ? time.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' }) : "";
+          const relativeTime = getRelativeTime(time);
+          const depthCategory = getDepthCategory(depthKm);
+          const depthColor = getColorForDepth(depthKm);
+          const addrClass = `addr-${lat.toFixed(4)}-${lon.toFixed(4)}`.replace(/[.-]/g, '_');
+
+          const popupHtml = `
+            <div style="font: 14px/1.4 system-ui, -apple-system, sans-serif; min-width: 280px; padding: 5px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 20px; font-weight: 900; color: #1a202c;">
+                    ${qMag ?? "?"} <span style="font-size: 12px; color: #718096; font-weight: 600;">${f.properties.magType ?? ""}</span>
                   </span>
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                    <span class="depth-badge" style="background:${q.depthColor}; color:#fff;">${q.depthCategory}</span>
-                    <span style="font-size: 14px; font-weight: 800; color: ${q.depthColor};">${formatDepth(q.depthKm)}</span>
-                  </div>
+                  <span class="depth-badge" style="background:${depthColor}; color:#fff; align-self: flex-start; margin-top: 4px;">${depthCategory}</span>
                 </div>
-                <div class="quake-time">
-                  <span style="font-size: 11px; color: #718096;">${q.time ? q.time.toLocaleDateString() : ""} ${timeStr}</span>
-                  <span style="color: #4299e1; font-size: 11px; font-weight: 700;">${relativeTime.toUpperCase()}</span>
+                <div style="text-align: right;">
+                  <div style="font-size: 11px; color: #718096; font-weight: 600;">${time ? time.toLocaleDateString() : ""}</div>
+                  <div style="font-size: 11px; color: #718096;">${timeStr}</div>
+                  <div style="color: #4299e1; font-size: 10px; font-weight: 800; margin-top: 2px;">${relativeTime.toUpperCase()}</div>
                 </div>
-            </div>
-            <div class="quake-place">${q.place}</div>
-            <div class="quake-details">
-                <div class="detail-row">
-                  <div class="detail-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
-                  </div>
+              </div>
+
+              <div style="font-size: 16px; font-weight: 800; color: #2d3748; margin-bottom: 10px; line-height: 1.2;">${place}</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; background: #f8fafc; padding: 8px; border-radius: 6px;">
+                <div style="display: flex; gap: 8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
                   <div>
-                    <div class="detail-label">Epicenter: <span style="font-weight: normal; color: #a0aec0; margin-left: 4px;">${q.lat.toFixed(4)}, ${q.lon.toFixed(4)}</span></div>
-                    <div id="${addressId}" class="detail-value" style="font-style: italic; color: #718096; font-size: 13px; margin-top: 2px;">Fetching address...</div>
+                    <div style="font-size: 10px; font-weight: 700; color: #718096; text-transform: uppercase;">Epicenter</div>
+                    <div style="font-size: 12px; color: #2d3748;">${lat.toFixed(4)}, ${lon.toFixed(4)}</div>
+                    <div class="${addrClass}" style="font-size: 11px; color: #718096; font-style: italic; margin-top: 2px;">Fetching address...</div>
                   </div>
                 </div>
-                <div class="detail-row">
-                  <div class="detail-icon">
+                <div style="display: flex; gap: 8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 700; color: #718096; text-transform: uppercase;">Distance & Depth</div>
+                    <div style="font-size: 12px; color: #2d3748;">${formatDistance(distance)} away / ${formatDepth(depthKm)} deep</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 11px;">
+                <div style="background: #fff; border: 1px solid #edf2f7; padding: 6px; border-radius: 4px;">
+                  <div style="color: #718096; font-weight: 700; margin-bottom: 2px;">FEEL REPORTS</div>
+                  <div style="font-weight: 800; color: #2d3748;">${f.properties.felt ?? 0} reports</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #edf2f7; padding: 6px; border-radius: 4px;">
+                  <div style="color: #718096; font-weight: 700; margin-bottom: 2px;">INTENSITY</div>
+                  <div style="font-weight: 800; color: #2d3748;">${f.properties.cdi ?? 'N/A'} CDI</div>
+                </div>
+              </div>
+
+              <div style="font-size: 10px; color: #a0aec0; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                <span>ID: ${f.id}</span>
+                <span>STATUS: ${f.properties.status.toUpperCase()}</span>
+              </div>
+
+              <div style="border-top: 1px solid #eee; padding-top: 10px; text-align: center;">
+                ${f.properties.url ? `<a href="${f.properties.url}" target="_blank" rel="noopener" style="display: block; background: #4299e1; color: white; text-decoration: none; padding: 8px; border-radius: 6px; font-weight: 700; transition: background 0.2s;">View USGS Event Page</a>` : ""}
+              </div>
+            </div>
+          `;
+
+          const marker = addMarker(lat, lon, popupHtml, false, getColorForMagnitude(qMag), depthKm, qMag);
+
+          visibleQuakes.push({
+            mag: qMag,
+            magType: f.properties.magType,
+            place,
+            time,
+            timeStr,
+            relativeTime,
+            lat,
+            lon,
+            depthKm,
+            distance,
+            depthCategory,
+            depthColor,
+            marker,
+            addrClass
+          });
+        }
+
+        visibleQuakes.sort((a, b) => b.time - a.time);
+
+        visibleQuakes.forEach(q => {
+          const item = document.createElement('div');
+          item.className = 'quake-item';
+          const magColor = getColorForMagnitude(q.mag);
+          const listPinSvg = getPinSvg(q.lat, q.lon, magColor, '-list-' + Math.random().toString(36).substr(2, 9), q.mag, q.depthColor, 1.3);
+
+          item.innerHTML = `
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px;">
+                <span style="font-size: 13px; color: #718096; font-weight: 700;">${q.time ? q.time.toLocaleDateString() : ""} ${q.timeStr}</span>
+                <span style="color: #4299e1; font-size: 13px; font-weight: 900; background: #ebf8ff; padding: 1px 6px; border-radius: 4px; text-transform: uppercase;">${q.relativeTime}</span>
+              </div>
+              
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span class="quake-mag" style="font-size: 1.8em; gap: 2px;">
+                    ${listPinSvg} ${q.mag ?? "?"} <span style="font-size: 14px; color: #718096; font-weight: 600; margin-left: 2px;">${q.magType ?? ""}</span>
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div class="detail-icon" style="color: #718096;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
-                  <div>
-                    <div class="detail-label">Distance: <span style="font-weight: normal; color: #a0aec0; margin-left: 4px;">${formatDistance(q.distance)}</span></div>
-                  </div>
+                  <div class="detail-value" style="font-weight: 800; font-size: 18px; color: #2d3748; white-space: nowrap;">${formatDistance(q.distance)} away</div>
                 </div>
-            </div>
-        `;
-        item.onclick = () => {
-          q.marker.openPopup();
-          map.panTo(q.marker.getLatLng());
-        };
-        sidebarContent.appendChild(item);
+              </div>
 
-        // Fetch address with a slight delay to avoid hitting rate limits too hard
-        setTimeout(() => getReverseGeocode(q.lat, q.lon, addressId), 200 * visibleQuakes.indexOf(q));
-      });
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <div class="detail-icon" style="color: #718096;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+                  </div>
+                  <div class="detail-value" style="color: #4a5568; font-size: 15px; font-weight: 700;">${q.lat.toFixed(3)}, ${q.lon.toFixed(3)}</div>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <span class="depth-badge" style="background:${q.depthColor}; color:#fff; font-size: 12px; padding: 1px 5px; border-radius: 3px;">${q.depthCategory}</span>
+                  <div class="detail-icon" style="color: ${q.depthColor};">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14M8 13l4 4 4-4M4 21h16"/></svg>
+                  </div>
+                  <span style="font-size: 15px; font-weight: 700; color: ${q.depthColor};">${formatDepth(q.depthKm)}</span>
+                </div>
+              </div>
 
-      document.getElementById('result-count').textContent = `Total : ${count} within Radius : ${formatDistance(currentRadiusMiles)}`;
+              <div class="quake-place">${q.place}</div>
+              <div class="quake-details" style="border: none; padding: 0;">
+                  <div class="detail-row">
+                    <div class="detail-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <div class="${q.addrClass} detail-value" style="font-style: italic; color: #718096; font-size: 15px;">Fetching address...</div>
+                  </div>
+              </div>
+          `;
+
+          item.onclick = () => {
+            const coordinates = ol.proj.fromLonLat([q.lon, q.lat]);
+            content.innerHTML = q.marker.get('popupHtml');
+            overlay.setPosition(coordinates);
+            map.getView().animate({ center: coordinates, duration: 500 });
+            getReverseGeocode(q.lat, q.lon);
+          };
+          sidebarContent.appendChild(item);
+
+          if (visibleQuakes.indexOf(q) < 5) {
+            setTimeout(() => getReverseGeocode(q.lat, q.lon), 1200 * visibleQuakes.indexOf(q));
+          }
+        });
+
+        // Update dashboard stats
+        document.getElementById('stat-total').textContent = count;
+        document.getElementById('stat-radius').textContent = `Radius: ${formatDistance(currentRadiusMiles)} `;
+        document.getElementById('stat-low').textContent = magCounts.low;
+        document.getElementById('stat-mid').textContent = magCounts.mid;
+        document.getElementById('stat-high').textContent = magCounts.high;
+        document.getElementById('stat-extreme').textContent = magCounts.extreme;
+        document.getElementById('stat-shallow').textContent = depthCounts.shallow;
+        document.getElementById('stat-intermediate').textContent = depthCounts.intermediate;
+        document.getElementById('stat-deep').textContent = depthCounts.deep;
+        document.getElementById('stat-verydeep').textContent = depthCounts.verydeep;
+      } catch (err) {
+        console.error("Load quakes error:", err);
+      }
     }
 
-    const legend = L.control({ position: "bottomright" }); // Moved to bottom right
-    legend.onAdd = function () {
-      const div = L.DomUtil.create("div", "legend");
-      div.innerHTML = `
-        <b>USGS Earthquakes</b><br/>
-        <small>Refreshes every 60s</small>
-      `;
-      return div;
-    };
-    legend.addTo(map);
-
     // Initial load
-    map.whenReady(async () => {
-      updateDepthLegend();
-      // Trigger updateMap to geocode the default location and set up the map
-      await updateMap();
+    updateDepthLegend();
+    updateMap();
 
-      // Auto refresh
-      setInterval(() => {
-        loadQuakes().catch(err => console.error(err));
-      }, 60_000);
+    // Auto refresh
+    setInterval(() => {
+      loadQuakes().catch(err => console.error(err));
+    }, 60_000);
+
+    // Add custom legend control for OpenLayers
+    const legendElement = document.createElement('div');
+    legendElement.className = 'ol-control ol-unselectable legend-ol';
+    legendElement.innerHTML = `
+            < div style = "background: white; padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); font: 14px/1.2 system-ui, -apple-system, sans-serif;" >
+        <b>USGS Earthquakes</b><br/>
+        <small style="opacity: 0.7; display: block; margin-top: 4px;">Refreshes every 60s</small>
+      </div >
+            `;
+
+    const legendControl = new ol.control.Control({
+      element: legendElement
     });
+
+    // Add style for legend positioning
+    const legendStyle = document.createElement('style');
+    legendStyle.innerHTML = `
+              .legend - ol {
+            bottom: 20px;
+            right: 20px;
+          }
+    `;
+    document.head.appendChild(legendStyle);
+    map.addControl(legendControl);
 
     // Add Enter key support
     document.getElementById('locationInput').addEventListener('keypress', function (e) {
