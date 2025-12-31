@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bay Area Earthquake Tracker (USGS + OpenStreetMap)</title>
+  <title>Earthquake Monitor - Real-time Seismic Activity Tracking</title>
 
   <!-- OpenLayers CSS/JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
@@ -34,19 +34,18 @@
 
     #sidebar {
       width: 450px;
-      background: #f8f9fa;
-      border-left: 1px solid #ddd;
+      background: #f0f4f8;
+      border-left: 1px solid #d0d8e0;
       display: flex;
       flex-direction: column;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.08);
       z-index: 1001;
-      /* Above map controls if needed */
     }
 
     #sidebar-header {
-      padding: 15px;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
+      padding: 15px 20px;
+      background: #f0f8f0;
+      border-bottom: 1px solid #d0e8d0;
     }
 
     #sidebar-content {
@@ -312,21 +311,52 @@
     /* Dashboard Analytics Section */
     #dashboard-analytics {
       background: #f8fafc;
-      padding: 6px 20px;
+      padding: 12px 20px;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
-      gap: 15px;
+      justify-content: center;
+      gap: 20px;
       overflow-x: auto;
       flex-shrink: 0;
       align-items: center;
+      text-align: center;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+    
+    /* Summary section */
+    .analytics-group:nth-child(1) {
+      background-color: #f0f9ff;  /* Light blue */
+      border-radius: 6px;
+      padding-left: 10px;
+    }
+    
+    /* Magnitude section */
+    .analytics-group:nth-child(2) {
+      background-color: #f0fdf4;  /* Light green */
+      border-radius: 6px;
+      padding-left: 10px;
+    }
+    
+    /* Depth section */
+    .analytics-group:nth-child(3) {
+      background-color: #f8fafc;  /* Light gray */
+      border-radius: 6px;
+      padding-left: 10px;
     }
 
     .analytics-group {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding-right: 15px;
-      border-right: 1px solid #e2e8f0;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      min-width: max-content;
+      gap: 12px;
+      padding: 12px 20px;
+      border: 1px solid #d1d5db;
+      margin: 4px 0;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     }
 
     .analytics-group:last-child {
@@ -334,36 +364,46 @@
     }
 
     .group-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 900;
+      color: #2d3748;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      margin: 0 8px 0 0;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     .group-content {
       display: flex;
-      gap: 6px;
+      gap: 12px;
       align-items: center;
+      justify-content: center;
+      width: auto;
     }
 
     .analytics-card {
-      background: white;
-      padding: 4px 10px;
+      background: #ffffff;
+      padding: 8px 12px;
       border-radius: 6px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #c4d8c4;
+      min-width: 80px;
       display: flex;
-      align-items: baseline;
-      gap: 6px;
-      min-width: 60px;
+      align-items: center;
+      gap: 8px;
       transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     .analytics-card:hover {
-      border-color: #cbd5e1;
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-color: #90b890;
+      background: #f0f8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
     }
 
     .analytics-info {
@@ -373,25 +413,29 @@
     }
 
     .analytics-label {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
-      color: #64748b;
+      color: #4a5568;
       text-transform: uppercase;
-      line-height: 1.1;
+      letter-spacing: 0.03em;
+      line-height: 1.3;
     }
 
     .analytics-value {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 900;
-      color: #0f172a;
       line-height: 1;
+      margin-right: 4px;
+      min-width: 30px;
+      text-align: center;
     }
 
     .analytics-sub {
       font-size: 11px;
-      color: #94a3b8;
+      color: #64748b;
       font-weight: 600;
-      margin-left: 2px;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
     }
 
     button.search-btn {
@@ -446,15 +490,20 @@
 
 <body>
   <div class="map-controls">
-    <h2
-      style="margin: 0; font-size: 1.2em; color: #333; display: flex; align-items: center; gap: 10px; white-space: nowrap;">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" style="color: #d32f2f;">
-        <path
-          d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      </svg>
-      EarthQuake tracker
-    </h2>
+    <header style="background: linear-gradient(90deg, #ffffff 0%, #ffcdd2 50%, #e57373 100%); border: 1px solid #e0e5ff; padding: 10px 20px 8px; margin: -20px -20px 15px -20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+      <div style="display: flex; align-items: center; gap: 20px; min-height: 90px;">
+        <img src="static/images/earthquakes-logo-clean-transparent.png" alt="Earthquake Icon" width="96" height="96" style="display: block; margin: 0;">
+        <div>
+          <h1 style="margin: 0; font-size: 1.8em; font-weight: 700; color: #2c3e8f; display: flex; align-items: center; gap: 10px; letter-spacing: -0.01em; line-height: 1.2;">
+            <span style="color: #2c3e8f; font-weight: 600;">Earthquake Tracker</span>
+            <span style="font-size: 0.6em; color: #4a5bbf; font-weight: 500; background: #ffffff; padding: 2px 8px; border-radius: 4px; border: 1px solid #d0d8e0;">USGS</span>
+          </h1>
+          <p style="margin: 2px 0 0 0; font-size: 0.9em; color: #666; font-weight: 400; line-height: 1.3;">
+            Real-time seismic activity data from USGS with advanced filtering and visualization
+          </p>
+        </div>
+      </div>
+    </header>
     <div class="control-row" style="align-items: flex-start; gap: 20px;">
       <div class="control-group">
         <label for="locationInput">Center Location</label>
@@ -518,7 +567,7 @@
         <div class="legend depth-legend" id="depthLegend"
           style="margin-top: 0; border-left: 1px solid #ddd; padding-left: 15px; flex-direction: column; align-items: flex-start; gap: 6px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 600;">Depth</span>
+            <span style="font-weight: 600;" title="Depth categories are derived from km values">Depth</span>
             <button class="small-btn" onclick="setAllDepthRanges(true)">All</button>
             <button class="small-btn" onclick="setAllDepthRanges(false)">Clear</button>
           </div>
@@ -608,24 +657,28 @@
           <div class="analytics-value" id="stat-shallow" style="color: #4caf50;">0</div>
           <div class="analytics-info">
             <div class="analytics-label">Shallow</div>
+            <div class="analytics-sub">&lt;4.3 mi</div>
           </div>
         </div>
         <div class="analytics-card" style="border-left: 3px solid #2196F3;">
           <div class="analytics-value" id="stat-intermediate" style="color: #2196F3;">0</div>
           <div class="analytics-info">
-            <div class="analytics-label">Intermed</div>
+            <div class="analytics-label">Intermediate</div>
+            <div class="analytics-sub">4.3-19 mi</div>
           </div>
         </div>
         <div class="analytics-card" style="border-left: 3px solid #ff9800;">
           <div class="analytics-value" id="stat-deep" style="color: #ff9800;">0</div>
           <div class="analytics-info">
             <div class="analytics-label">Deep</div>
+            <div class="analytics-sub">19-43 mi</div>
           </div>
         </div>
         <div class="analytics-card" style="border-left: 3px solid #f44336;">
           <div class="analytics-value" id="stat-verydeep" style="color: #f44336;">0</div>
           <div class="analytics-info">
-            <div class="analytics-label">V. Deep</div>
+            <div class="analytics-label">Very Deep</div>
+            <div class="analytics-sub">&gt;43 mi</div>
           </div>
         </div>
       </div>
@@ -1233,7 +1286,7 @@
           item.innerHTML = `
               <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px;">
                 <span style="font-size: 13px; color: #718096; font-weight: 700;">${q.time ? q.time.toLocaleDateString() : ""} ${q.timeStr}</span>
-                <span style="color: #4299e1; font-size: 13px; font-weight: 900; background: #ebf8ff; padding: 1px 6px; border-radius: 4px; text-transform: uppercase;">${q.relativeTime}</span>
+                <span style="color: #4299e1; font-size: 13px; font-weight: 900; text-transform: uppercase;">${q.relativeTime}</span>
               </div>
               
               <div style="display: flex; align-items: center; gap: 10px;">
@@ -1320,10 +1373,10 @@
     const legendElement = document.createElement('div');
     legendElement.className = 'ol-control ol-unselectable legend-ol';
     legendElement.innerHTML = `
-            < div style = "background: white; padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); font: 14px/1.2 system-ui, -apple-system, sans-serif;" >
+      <div style="background: white; padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2); font: 14px/1.2 system-ui, -apple-system, sans-serif;">
         <b>USGS Earthquakes</b><br/>
-        <small style="opacity: 0.7; display: block; margin-top: 4px;">Refreshes every 60s</small>
-      </div >
+        <small style="opacity: 0.7; display: block; margin-top: 4px;">Auto-updates every 60s</small>
+      </div>
             `;
 
     const legendControl = new ol.control.Control({
@@ -1333,10 +1386,10 @@
     // Add style for legend positioning
     const legendStyle = document.createElement('style');
     legendStyle.innerHTML = `
-              .legend - ol {
-            bottom: 20px;
-            right: 20px;
-          }
+      .legend-ol {
+        bottom: 20px;
+        right: 20px;
+      }
     `;
     document.head.appendChild(legendStyle);
     map.addControl(legendControl);
