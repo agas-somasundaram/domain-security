@@ -311,11 +311,11 @@
     /* Dashboard Analytics Section */
     #dashboard-analytics {
       background: #f8fafc;
-      padding: 12px 20px;
+      padding: 8px 10px;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 8px;
       overflow-x: auto;
       flex-shrink: 0;
       align-items: center;
@@ -351,12 +351,12 @@
       align-items: center;
       justify-content: center;
       min-width: max-content;
-      gap: 12px;
-      padding: 12px 20px;
+      gap: 6px;
+      padding: 6px 10px;
       border: 1px solid #d1d5db;
-      margin: 4px 0;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      margin: 2px 0;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     .analytics-group:last-child {
@@ -364,18 +364,18 @@
     }
 
     .group-label {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 900;
       color: #2d3748;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.03em;
       white-space: nowrap;
-      margin: 0 8px 0 0;
-      padding: 3px 8px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      margin: 0 4px 0 0;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .group-content {
@@ -388,15 +388,15 @@
 
     .analytics-card {
       background: #ffffff;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
       border: 1px solid #c4d8c4;
-      min-width: 80px;
+      min-width: 60px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .analytics-card:hover {
@@ -413,29 +413,31 @@
     }
 
     .analytics-label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #4a5568;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      line-height: 1.3;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .analytics-value {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 900;
       line-height: 1;
-      margin-right: 4px;
-      min-width: 30px;
+      margin-right: 2px;
+      min-width: 24px;
       text-align: center;
     }
 
     .analytics-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: #64748b;
       font-weight: 600;
-      margin-top: 2px;
-      letter-spacing: 0.02em;
+      margin-top: 1px;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
     }
 
     button.search-btn {
@@ -507,37 +509,38 @@
     <div class="control-row" style="align-items: flex-start; gap: 20px;">
       <div class="control-group">
         <label for="locationInput">Center Location</label>
-        <input type="text" id="locationInput" placeholder="e.g. San Francisco" value="San Ramon"
+        <input type="text" id="locationInput" placeholder="e.g. San Francisco" value="San Ramon, California, United States"
           style="width: 350px;" />
       </div>
-      <div class="control-group">
-        <label for="radiusInput" id="radiusLabel">Radius (miles)</label>
-        <input type="number" id="radiusInput" value="15" style="width: 60px;" />
-      </div>
-      <div class="control-group">
-        <label for="periodInput">Time Period</label>
-        <select id="periodInput" onchange="loadQuakes()"
-          style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; height: 36px;">
-          <option value="1">Past Hour</option>
-          <option value="4">Past 4 Hours</option>
-          <option value="8" selected>Past 8 Hours</option>
-          <option value="12">Past 12 Hours</option>
-          <option value="24">Past 24 Hours</option>
-          <option value="48">Past 2 Days</option>
-          <option value="72">Past 3 Days</option>
-          <option value="120">Past 5 Days</option>
-          <option value="168">Past 7 Days</option>
-          <option value="360">Past 15 Days</option>
-          <option value="720">Past 30 Days</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="depthUnitInput">Distance Unit</label>
-        <select id="depthUnitInput" onchange="updateDepthLegend(); loadQuakes();"
-          style="padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; height: 36px;">
-          <option value="km">Kilometers</option>
-          <option value="mi" selected>Miles</option>
-        </select>
+      
+      <div class="control-group" style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="periodInput" style="min-width: 80px; margin: 0;">Time Period:</label>
+          <select id="periodInput" onchange="loadQuakes()"
+            style="flex: 1; padding: 4px 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 30px;">
+            <option value="1">Past Hour</option>
+            <option value="4">Past 4 Hours</option>
+            <option value="8">Past 8 Hours</option>
+            <option value="24" selected>Past 24 Hours</option>
+            <option value="48">Past 2 Days</option>
+            <option value="72">Past 3 Days</option>
+            <option value="120">Past 5 Days</option>
+            <option value="168">Past 7 Days</option>
+            <option value="360">Past 15 Days</option>
+            <option value="720">Past 30 Days</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="radiusInput" style="min-width: 80px; margin: 0;">Radius:</label>
+          <input type="number" id="radiusInput" value="25" 
+            style="flex: 1; padding: 4px 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 20px;" />
+          <select id="depthUnitInput" onchange="updateDepthLegend(); loadQuakes();"
+            style="flex: 0 0 auto; padding: 4px 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 30px;">
+            <option value="km">km</option>
+            <option value="mi" selected>mi</option>
+          </select>
+        </div>
       </div>
 
       <div style="display: flex; gap: 0; border-left: 1px solid #ddd;">
@@ -1360,9 +1363,19 @@
       }
     }
 
-    // Initial load
+    // Initial load with San Ramon coordinates
     updateDepthLegend();
+    
+    // Set San Ramon coordinates (37.7799° N, 121.9780° W)
+    const sanRamonCoords = ol.proj.fromLonLat([-121.9780, 37.7799]);
+    map.getView().setCenter(sanRamonCoords);
+    map.getView().setZoom(10);
+    
+    // Trigger update with current values (San Ramon and 25 miles)
     updateMap();
+    
+    // Add a small delay to ensure the map is fully loaded before centering
+    setTimeout(updateMap, 500);
 
     // Auto refresh
     setInterval(() => {
