@@ -1,0 +1,7 @@
+# macOS system files
+.DS_Store
+
+# Backup files
+*_previous.html
+*_backup.html
+*~
